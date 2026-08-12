@@ -4,25 +4,25 @@ const normalLowercaseOffset = 97;
 const alphabetLength = 26;
 
 class FontBlock{
-	constructor(numbersStartOffset, capitalsStartOffset, lowercaseStartOffset){
-		this.numbersStartOffset = numbersStartOffset or normalNumbersOffset;
-		this.capitalsStartOffset = capitalsStartOffset or normalCapitalsOffset;
-		this.lowercaseStartOffset = lowercaseStartOffset or normalLowercaseOffset;
-	}
-
-	getNumber(digitId){
-		return digitId+this.numbersStartOffset;
+	constructor(capitalsStartOffset, lowercaseStartOffset, numbersStartOffset){
+		this.capitalsStartOffset = capitalsStartOffset || normalCapitalsOffset;
+		this.lowercaseStartOffset = lowercaseStartOffset || normalLowercaseOffset;
+		this.numbersStartOffset = numbersStartOffset || normalNumbersOffset;
 	}
 
 	getCapital(letterId){
-		return letterId+this.capitalsStartOffset;
+		return letterId-normalCapitalsOffset+this.capitalsStartOffset;
 	}
 
 	getLowercase(letterId){
-		return letterId+this.lowercaseStartOffset;
+		return letterId-normalLowercaseOffset+this.lowercaseStartOffset;
 	}
 
-	getCharacter(character){
+	getNumber(digitId){
+		return digitId-normalNumbersOffset+this.numbersStartOffset;
+	}
+
+	convertCharacter(character){
 		let characterId = character.codePointAt(0);
 		let convertedCharacterId;
 		if(characterId>=normalNumbersOffset && characterId<normalNumbersOffset+10){
@@ -31,6 +31,23 @@ class FontBlock{
 			convertedCharacterId = this.getCapital(characterId);
 		} else if(characterId>=normalLowercaseOffset && characterId<normalLowercaseOffset+alphabetLength){
 			convertedCharacterId = this.getLowercase(characterId);
+		} else{
+			convertedCharacterId = characterId;
 		}
+		return String.fromCodePoint(convertedCharacterId);
+	}
+
+	convertString(characterString){
+		let result = "";
+		for(let characterIndex=0; characterIndex<characterString.length; characterIndex++){
+			result = result + this.convertCharacter(characterString[characterIndex]);
+		}
+		return result;
 	}
 }
+
+let fontBlocks = {
+	"Normal": new FontBlock(undefined, undefined, undefined),
+	"Script": new FontBlock(0x1d49c, 0x1d4b6, undefined),
+	"Franktur normal": new FontBlock(0x1d504, 0x1d51e, undefined)
+};
