@@ -1,5 +1,7 @@
 let fontDropdown = document.getElementById("fontSelectDropdown");
 let conversionTextbox = document.getElementById("conversionTextbox");
+let fontDemoParagraph = document.getElementById("fontDemoParagraph");
+const pangramOfChoice = "The quick brown fox jumps over the lazy dog.";
 let fontNames = Object.keys(fontBlocks);
 for(let fontIndex=0; fontIndex<fontNames.length; fontIndex++){
 	let fontName = fontNames[fontIndex];
@@ -14,3 +16,13 @@ conversionTextbox.oninput = function(){
 	}
 	previousTextboxLength = currentTextboxLength;
 }
+
+function updateDemoText(){
+	let normalDemoText = pangramOfChoice.upper()+"\n"+pangramOfChoice.lower()+"\n"+"1234567890";
+	fontDemoParagraph.innerHTML = fontBlocks[fontDropdown.value].convertString(normalDemoText);
+}
+//updateDemoText();
+
+fontDropdown.addEventListener("change", (event)=>{
+	updateDemoText();
+});
