@@ -18,10 +18,10 @@ conversionTextbox.oninput = function(){
 }
 
 function updateDemoText(){
-	let normalDemoText = pangramOfChoice.upper()+"\n"+pangramOfChoice.lower()+"\n"+"1234567890";
-	fontDemoParagraph.innerHTML = fontBlocks[fontDropdown.value].convertString(normalDemoText);
+	let normalDemoText = pangramOfChoice.toUpperCase()+"\n"+pangramOfChoice.toLowerCase()+"\n"+"1234567890";
+	fontDemoParagraph.innerHTML = fontBlocks[fontDropdown.value].convertString(normalDemoText).replace(/\n/g, "</br>"); // Replace newlines with line breaks here so we don't convert the characters making up the tag.
 }
-//updateDemoText();
+updateDemoText();
 
 fontDropdown.addEventListener("change", (event)=>{
 	updateDemoText();
