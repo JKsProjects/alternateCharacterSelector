@@ -1,3 +1,6 @@
+const conversionTextStorageKey = "conversionText";
+const selectedFontStorageKey = "selectedFont";
+
 let fontDropdown = document.getElementById("fontSelectDropdown");
 let conversionTextbox = document.getElementById("conversionTextbox");
 let fontDemoParagraph = document.getElementById("fontDemoParagraph");
@@ -17,6 +20,7 @@ conversionTextbox.oninput = function(){
 		conversionTextbox.value = newConvertedText;
 	}
 	previousTextboxLength = currentTextboxLength;
+	browser.storage.local.set({[conversionTextStorageKey]: conversionTextbox.value}).then(()=>{});
 }
 
 function updateDemoText(){
@@ -27,8 +31,16 @@ updateDemoText();
 
 fontDropdown.addEventListener("change", (event)=>{
 	updateDemoText();
+	console.log("Stored font dropdown value of "+fontDropdown.value);
+	browser.storage.local.set({[selectedFontStorageKey]: fontDropdown.value}).then(()=>{});
 });
 
 copyButton.addEventListener("click", (event)=>{
 	navigator.clipboard.writeText(conversionTextbox.value);
 });
+
+function restoreStateFromStorage(){
+	browser.storage.local.get(selectedFontStorageKey).then(value=>{fontDropdown.value = value[selectedFontStorageKey]});
+	browser.storage.local.get(conversionTextStorageKey).then((value)=>{conversionTextbox.value = value[conversionTextStorageKey]});
+}
+restoreStateFromStorage();

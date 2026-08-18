@@ -4,7 +4,7 @@
 	"version": "0.1",
 	
 	"description": "Popup allows selection of different-fonted unicode characters.",
-	"permissions": ["clipboardWrite"],
+	"permissions": ["clipboardWrite", "storage"],
 	"browser_specific_settings": {
 		"gecko": {
 			"id": "name@example.com",

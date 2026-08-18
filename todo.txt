@@ -1,0 +1,2 @@
+- Google Chat content script
+- button to insert directly into Chat or modification to the built-in styling button
