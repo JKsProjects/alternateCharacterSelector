@@ -1,0 +1,10 @@
+*{
+    font-size: 12pt;
+}
+@media (prefers-color-scheme: dark){
+    *{
+        color: white;
+        background-color: black;
+        border-color: darkgray;
+    }
+}
