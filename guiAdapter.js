@@ -5,7 +5,7 @@ let fontDropdown = document.getElementById("fontSelectDropdown");
 let conversionTextbox = document.getElementById("conversionTextbox");
 let fontDemoParagraph = document.getElementById("fontDemoParagraph");
 let copyButton = document.getElementById("copyButton");
-const pangramOfChoice = "The quick brown fox jumps over the lazy dog.";
+const pangramOfChoice = "The quick brown fox jumps over the lazy dog";
 let fontNames = Object.keys(fontBlocks);
 for(let fontIndex=0; fontIndex<fontNames.length; fontIndex++){
 	let fontName = fontNames[fontIndex];
@@ -16,7 +16,7 @@ let previousTextboxLength = conversionTextbox.value.length;
 conversionTextbox.oninput = function(){
 	let currentTextboxLength = conversionTextbox.value.length;
 	if(currentTextboxLength > previousTextboxLength){
-		let newConvertedText = conversionTextbox.value.slice(0, -1) + fontBlocks[fontDropdown.value].convertCharacter(conversionTextbox.value.slice(-1));
+		let newConvertedText = conversionTextbox.value.slice(0, previousTextboxLength) + fontBlocks[fontDropdown.value].convertString(conversionTextbox.value.slice(previousTextboxLength, currentTextboxLength));
 		conversionTextbox.value = newConvertedText;
 	}
 	previousTextboxLength = currentTextboxLength;
@@ -27,7 +27,6 @@ function updateDemoText(){
 	let normalDemoText = pangramOfChoice.toUpperCase()+"\n"+pangramOfChoice.toLowerCase()+"\n"+"1234567890";
 	fontDemoParagraph.innerHTML = fontBlocks[fontDropdown.value].convertString(normalDemoText).replace(/\n/g, "</br>"); // Replace newlines with line breaks here so we don't convert the characters making up the tag.
 }
-updateDemoText();
 
 fontDropdown.addEventListener("change", (event)=>{
 	updateDemoText();
@@ -40,7 +39,14 @@ copyButton.addEventListener("click", (event)=>{
 });
 
 function restoreStateFromStorage(){
-	browser.storage.local.get(selectedFontStorageKey).then(value=>{fontDropdown.value = value[selectedFontStorageKey]});
-	browser.storage.local.get(conversionTextStorageKey).then((value)=>{conversionTextbox.value = value[conversionTextStorageKey]});
+	browser.storage.local.get(selectedFontStorageKey).then(value=>{
+        let storedSelectedFont = value[selectedFontStorageKey];
+        fontDropdown.value = (typeof storedSelectedFont === "string")? storedSelectedFont : "";
+        updateDemoText();
+    });
+	browser.storage.local.get(conversionTextStorageKey).then((value)=>{
+        let storedConversionText = value[conversionTextStorageKey] ;
+        conversionTextbox.value = (typeof storedConversionText === "string")? storedConversionText : "";
+    });
 }
 restoreStateFromStorage();
