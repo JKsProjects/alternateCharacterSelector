@@ -5,7 +5,8 @@ let fontDropdown = document.getElementById("fontSelectDropdown");
 let conversionTextbox = document.getElementById("conversionTextbox");
 let fontDemoParagraph = document.getElementById("fontDemoParagraph");
 let copyButton = document.getElementById("copyButton");
-const pangramOfChoice = "The quick brown fox jumps over the lazy dog";
+let reverseButton = document.getElementById("reverseButton");
+const pangramOfChoice = "abcdefghijklmnopqrstuvwxyz";//"The quick brown fox jumps over the lazy dog";
 let fontNames = Object.keys(fontBlocks);
 for(let fontIndex=0; fontIndex<fontNames.length; fontIndex++){
 	let fontName = fontNames[fontIndex];
@@ -13,15 +14,25 @@ for(let fontIndex=0; fontIndex<fontNames.length; fontIndex++){
 }
 
 let previousTextboxLength = conversionTextbox.value.length;
-conversionTextbox.oninput = function(){
-	let currentTextboxLength = conversionTextbox.value.length;
-	if(currentTextboxLength > previousTextboxLength){
-		let newConvertedText = conversionTextbox.value.slice(0, previousTextboxLength) + fontBlocks[fontDropdown.value].convertString(conversionTextbox.value.slice(previousTextboxLength, currentTextboxLength));
-		conversionTextbox.value = newConvertedText;
+conversionTextbox.addEventListener("beforeinput", (event) => {
+	event.preventDefault();
+	let newSelectionStart = conversionTextbox.selectionStart,
+		newSelectionEnd = conversionTextbox.selectionEnd;
+	if(event.inputType == "insertText" || event.inputType == "insertFromPaste"){
+		let alteredInputtedText = fontBlocks[fontDropdown.value].convertString(event.data);
+		conversionTextbox.value = [conversionTextbox.value.slice(0, conversionTextbox.selectionStart), alteredInputtedText, conversionTextbox.value.slice(conversionTextbox.selectionEnd, conversionTextbox.value.length)].join("");
+		newSelectionEnd = (newSelectionStart += alteredInputtedText.length);
+	} else if(event.inputType == "deleteContentBackward" && !(newSelectionStart == 0 && newSelectionEnd == 0)){
+		conversionTextbox.value = conversionTextbox.value.slice(0, conversionTextbox.selectionStart-1) + conversionTextbox.value.slice(conversionTextbox.selectionEnd);
+		newSelectionEnd = (newSelectionStart -= 1);
+	} else if(event.inputType == "deleteContentForward" && !(newSelectionStart == conversionTextbox.value.length && newSelectionEnd == conversionTextbox.value.length)){
+		conversionTextbox.value = conversionTextbox.value.slice(0, conversionTextbox.selectionStart) + conversionTextbox.value.slice(conversionTextbox.selectionEnd+1);
+		newSelectionEnd = newSelectionStart;
 	}
-	previousTextboxLength = currentTextboxLength;
-	browser.storage.local.set({[conversionTextStorageKey]: conversionTextbox.value}).then(()=>{});
-}
+	conversionTextbox.selectionStart = newSelectionStart;
+	conversionTextbox.selectionEnd = newSelectionEnd;
+ 	browser.storage.local.set({[conversionTextStorageKey]: conversionTextbox.value}).then(()=>{});
+});
 
 function updateDemoText(){
 	let normalDemoText = pangramOfChoice.toUpperCase()+"\n"+pangramOfChoice.toLowerCase()+"\n"+"1234567890";
@@ -36,6 +47,10 @@ fontDropdown.addEventListener("change", (event)=>{
 
 copyButton.addEventListener("click", (event)=>{
 	navigator.clipboard.writeText(conversionTextbox.value);
+});
+
+reverseButton.addEventListener("click", (event)=>{
+	conversionTextbox.value=conversionTextbox.value.split("").reverse().join("");
 });
 
 function restoreStateFromStorage(){
