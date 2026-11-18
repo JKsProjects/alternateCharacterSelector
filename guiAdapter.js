@@ -8,6 +8,7 @@ let fontDemoParagraph = document.getElementById("fontDemoParagraph");
 let copyButton = document.getElementById("copyButton");
 let reverseButton = document.getElementById("reverseButton");
 const pangramOfChoice = "abcdefghijklmnopqrstuvwxyz";//"The quick brown fox jumps over the lazy dog";
+const allSymbols = "~`!@#$%^&*()-_+={}[]\\|:;\"'<>,.?/";
 let fontNames = Object.keys(fontBlocks);
 for(let fontIndex=0; fontIndex<fontNames.length; fontIndex++){
 	let fontName = fontNames[fontIndex];
@@ -28,7 +29,7 @@ inputTextbox.addEventListener("input", (event) => {
 });
 
 function updateDemoText(){
-	let normalDemoText = pangramOfChoice.toUpperCase()+"\n"+pangramOfChoice.toLowerCase()+"\n"+"1234567890";
+	let normalDemoText = pangramOfChoice.toUpperCase()+"\n"+pangramOfChoice.toLowerCase()+"\n"+"1234567890"+"\n"+allSymbols;
 	fontDemoParagraph.innerHTML = fontBlocks[fontDropdown.value].convertString(normalDemoText).replace(/\n/g, "</br>"); // Replace newlines with line breaks here so we don't convert the characters making up the tag.
 }
 
