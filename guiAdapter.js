@@ -2,7 +2,8 @@ const conversionTextStorageKey = "conversionText";
 const selectedFontStorageKey = "selectedFont";
 
 let fontDropdown = document.getElementById("fontSelectDropdown");
-let conversionTextbox = document.getElementById("conversionTextbox");
+let inputTextbox = document.getElementById("inputTextbox");
+let outputTextbox = document.getElementById("outputTextbox");
 let fontDemoParagraph = document.getElementById("fontDemoParagraph");
 let copyButton = document.getElementById("copyButton");
 let reverseButton = document.getElementById("reverseButton");
@@ -13,25 +14,17 @@ for(let fontIndex=0; fontIndex<fontNames.length; fontIndex++){
 	fontDropdown.add(new Option(fontBlocks[fontName].convertString(fontName), fontName));
 }
 
-let previousTextboxLength = conversionTextbox.value.length;
-conversionTextbox.addEventListener("beforeinput", (event) => {
-	event.preventDefault();
-	let newSelectionStart = conversionTextbox.selectionStart,
-		newSelectionEnd = conversionTextbox.selectionEnd;
-	if(event.inputType == "insertText" || event.inputType == "insertFromPaste"){
-		let alteredInputtedText = fontBlocks[fontDropdown.value].convertString(event.data);
-		conversionTextbox.value = [conversionTextbox.value.slice(0, conversionTextbox.selectionStart), alteredInputtedText, conversionTextbox.value.slice(conversionTextbox.selectionEnd, conversionTextbox.value.length)].join("");
-		newSelectionEnd = (newSelectionStart += alteredInputtedText.length);
-	} else if(event.inputType == "deleteContentBackward" && !(newSelectionStart == 0 && newSelectionEnd == 0)){
-		conversionTextbox.value = conversionTextbox.value.slice(0, conversionTextbox.selectionStart-1) + conversionTextbox.value.slice(conversionTextbox.selectionEnd);
-		newSelectionEnd = (newSelectionStart -= 1);
-	} else if(event.inputType == "deleteContentForward" && !(newSelectionStart == conversionTextbox.value.length && newSelectionEnd == conversionTextbox.value.length)){
-		conversionTextbox.value = conversionTextbox.value.slice(0, conversionTextbox.selectionStart) + conversionTextbox.value.slice(conversionTextbox.selectionEnd+1);
-		newSelectionEnd = newSelectionStart;
-	}
-	conversionTextbox.selectionStart = newSelectionStart;
-	conversionTextbox.selectionEnd = newSelectionEnd;
- 	browser.storage.local.set({[conversionTextStorageKey]: conversionTextbox.value}).then(()=>{});
+function updateOutputTextbox(){
+	outputTextbox.value = fontBlocks[fontDropdown.value].convertString(inputTextbox.value);
+}
+
+function inputTextboxChanged(){
+	updateOutputTextbox();
+	browser.storage.local.set({[conversionTextStorageKey]: inputTextbox.value}).then(()=>{});
+}
+
+inputTextbox.addEventListener("input", (event) => {
+	inputTextboxChanged();
 });
 
 function updateDemoText(){
@@ -41,16 +34,18 @@ function updateDemoText(){
 
 fontDropdown.addEventListener("change", (event)=>{
 	updateDemoText();
+	inputTextboxChanged();
 	console.log("Stored font dropdown value of "+fontDropdown.value);
 	browser.storage.local.set({[selectedFontStorageKey]: fontDropdown.value}).then(()=>{});
 });
 
 copyButton.addEventListener("click", (event)=>{
-	navigator.clipboard.writeText(conversionTextbox.value);
+	navigator.clipboard.writeText(outputTextbox.value);
 });
 
 reverseButton.addEventListener("click", (event)=>{
-	conversionTextbox.value=conversionTextbox.value.split("").reverse().join("");
+	inputTextbox.value=inputTextbox.value.split("").reverse().join("");
+	inputTextboxChanged();
 });
 
 function restoreStateFromStorage(){
@@ -61,7 +56,8 @@ function restoreStateFromStorage(){
     });
 	browser.storage.local.get(conversionTextStorageKey).then((value)=>{
         let storedConversionText = value[conversionTextStorageKey] ;
-        conversionTextbox.value = (typeof storedConversionText === "string")? storedConversionText : "";
+        inputTextbox.value = (typeof storedConversionText === "string")? storedConversionText : "";
+		inputTextboxChanged();
     });
 }
 restoreStateFromStorage();
